@@ -1,8 +1,9 @@
 {
-    "rom_dir": "D:/ROMs/apple2gs",
-    "output_dir": "D:/Emulators/EmulationStation-DE/ES-DE/gamelists",
-    "extensions": ".zip",
-    "recursive": true,
-    "use_mame_softlist": true,
-    "mame_softlist_path": "D:/Emulators/mame/hash/apple2gs_flop_clcracked.xml"
+  "folder_path": "D:/ROMs/MAME/MAME Software List ROMs (split)/gbcolor",
+  "output_path": "D:/Emulators/EmulationStation-DE/ES-DE/gamelists",
+  "extensions": ".zip",
+  "recursive": true,
+  "use_full_paths": false,
+  "use_softlist": true,
+  "softlist_file": "D:/Emulators/mame/hash/gbcolor.xml"
 }

@@ -5,7 +5,7 @@ a = Analysis(
     ['gamelist_generator.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('aldrich.ttf', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
