@@ -1,3 +1,4 @@
-# gamelist_generator
-Produces basic game lists for use with Emulation Station.
-You select the directory where the games are, the output directory where the gamelist files should go, and then set the file extensions for the files you want in the list.   
+Simple program to generate gamelist.xml files for EmulationStation-DE. Includes Mame software list re-naming.
+
+build it with:
+python -m PyInstaller --onefile --windowed --icon=icon.png --add-data="aldrich.ttf;." gamelist_generator.py
