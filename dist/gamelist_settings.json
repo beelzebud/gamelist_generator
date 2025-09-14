@@ -1,0 +1,9 @@
+{
+  "folder_path": "D:/ROMs/pc88",
+  "output_folder_path": "D:/Emulators/EmulationStation-DE/ES-DE/gamelists",
+  "extensions": ".zip",
+  "recursive": true,
+  "use_softlist": true,
+  "softlist_file": "D:/Emulators/mame/hash/pc8801_flop.xml",
+  "use_full_paths": true
+}

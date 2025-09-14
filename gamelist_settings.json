@@ -1,0 +1,9 @@
+{
+  "folder_path": "D:/ROMs/MAME/MAME Software List ROMs (split)/apple2gs_flop_clcracked",
+  "output_folder_path": "D:/Emulators/EmulationStation-DE/ES-DE/gamelists",
+  "extensions": ".zip",
+  "recursive": false,
+  "use_softlist": true,
+  "softlist_file": "D:/Emulators/mame/hash/apple2gs_flop_clcracked.xml",
+  "use_full_paths": true
+}

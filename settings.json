@@ -1,0 +1,8 @@
+{
+    "rom_dir": "D:/ROMs/apple2gs",
+    "output_dir": "D:/Emulators/EmulationStation-DE/ES-DE/gamelists",
+    "extensions": ".zip",
+    "recursive": true,
+    "use_mame_softlist": true,
+    "mame_softlist_path": "D:/Emulators/mame/hash/apple2gs_flop_clcracked.xml"
+}
