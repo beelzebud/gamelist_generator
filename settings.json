@@ -1,9 +1,0 @@
-{
-  "folder_path": "D:/ROMs/MAME/MAME Software List ROMs (split)/gbcolor",
-  "output_path": "D:/Emulators/EmulationStation-DE/ES-DE/gamelists",
-  "extensions": ".zip",
-  "recursive": true,
-  "use_full_paths": false,
-  "use_softlist": true,
-  "softlist_file": "D:/Emulators/mame/hash/gbcolor.xml"
-}
