@@ -1,24 +1,21 @@
 import xml.etree.ElementTree as ET
 
-def parse_softlist(xml_file):
+
+def load_softlist(xml_path):
     """
-    Parses a MAME software list XML file and returns a dict mapping rom names to full names.
-
-    Args:
-        xml_file (str): Path to the software list XML file.
-
-    Returns:
-        dict: { 'rom_basename_lower': 'Full Name' }
+    Parse a MAME softlist XML file into a dict:
+      { "romfilename": "Full Game Name", ... }
     """
-    mapping = {}
-    tree = ET.parse(xml_file)
-    root = tree.getroot()
+    result = {}
+    try:
+        tree = ET.parse(xml_path)
+        root = tree.getroot()
 
-    # Iterate over software elements
-    for software in root.findall(".//software"):
-        name_attr = software.get("name")
-        description_elem = software.find("description")
-        if name_attr and description_elem is not None and description_elem.text:
-            mapping[name_attr.lower()] = description_elem.text.strip()
-
-    return mapping
+        for software in root.findall("software"):
+            name = software.get("name", "").strip().lower()
+            description = software.findtext("description", "").strip()
+            if name:
+                result[name] = description or name
+    except Exception as e:
+        print(f"[mame_softlist] Failed to parse {xml_path}: {e}")
+    return result
