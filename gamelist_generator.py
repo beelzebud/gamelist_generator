@@ -6,7 +6,7 @@ from xml.dom import minidom
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QLineEdit, QPushButton, QFileDialog, QCheckBox, QTableWidget,
-    QTableWidgetItem, QHeaderView, QAbstractItemView, QMessageBox
+    QTableWidgetItem, QHeaderView, QAbstractItemView, QStatusBar
 )
 from PyQt5.QtCore import Qt, QByteArray
 from PyQt5.QtGui import QFontDatabase
@@ -44,7 +44,6 @@ class GameListGenerator(QWidget):
         self.setWindowTitle("Gamelist Generator")
         self.resize(1000, 650)
 
-        # restore geometry safely (only if it's a string)
         geom_data = self.settings.get("window_geometry", None)
         if isinstance(geom_data, str):
             try:
@@ -65,7 +64,7 @@ class GameListGenerator(QWidget):
         rom_layout.addWidget(btn_browse_rom)
         layout.addLayout(rom_layout)
 
-        # Output directory (base gamelists folder)
+        # Output directory
         out_layout = QHBoxLayout()
         out_layout.addWidget(QLabel("Base Gamelist Folder (e.g. ES-DE/gamelists):"))
         self.ent_output = QLineEdit(
@@ -80,25 +79,23 @@ class GameListGenerator(QWidget):
         out_layout.addWidget(btn_browse_out)
         layout.addLayout(out_layout)
 
-        # Extensions (single-line, comma separated)
+        # Extensions
         ext_layout = QHBoxLayout()
         ext_layout.addWidget(QLabel("File extensions (comma separated):"))
         self.ent_ext = QLineEdit(self.settings.get("extensions", ".zip"))
         ext_layout.addWidget(self.ent_ext)
         layout.addLayout(ext_layout)
 
-        # Recursive checkbox
+        # Options
         self.chk_recursive = QCheckBox("Scan subdirectories recursively (follow symlinks)")
         self.chk_recursive.setChecked(self.settings.get("recursive", False))
         self.chk_recursive.stateChanged.connect(self.load_roms)
         layout.addWidget(self.chk_recursive)
 
-        # Full path checkbox
         self.chk_fullpath = QCheckBox("Use full ROM paths in XML")
         self.chk_fullpath.setChecked(self.settings.get("use_fullpath", False))
         layout.addWidget(self.chk_fullpath)
 
-        # Use softlist
         self.chk_softlist = QCheckBox("Use MAME Software List Names")
         self.chk_softlist.setChecked(self.settings.get("use_softlist", False))
         self.chk_softlist.stateChanged.connect(self.load_roms)
@@ -114,17 +111,16 @@ class GameListGenerator(QWidget):
         soft_layout.addWidget(btn_browse_softlist)
         layout.addLayout(soft_layout)
 
-        # Live preview table
+        # Table
         self.table = QTableWidget(0, 3)
         self.table.setHorizontalHeaderLabels(["Exclude", "ROM Path", "Name"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         layout.addWidget(self.table)
 
-        # Buttons below table
+        # Buttons
         btn_layout = QHBoxLayout()
         self.btn_generate = QPushButton("Generate Gamelist")
         self.btn_generate.clicked.connect(self.generate_gamelist)
@@ -133,6 +129,10 @@ class GameListGenerator(QWidget):
         btn_layout.addWidget(self.btn_generate)
         btn_layout.addWidget(self.btn_clear)
         layout.addLayout(btn_layout)
+
+        # Status bar
+        self.status_bar = QStatusBar()
+        layout.addWidget(self.status_bar)
 
         self.setLayout(layout)
         self.apply_theme()
@@ -152,26 +152,24 @@ class GameListGenerator(QWidget):
                 font-family: Aldrich, monospace;
                 font-size: 12pt;
             }
-            QLineEdit, QTableWidget {
+            QLineEdit, QTableWidget, QTableCornerButton::section {
                 background-color: black;
                 color: #00FF00;
                 selection-background-color: #003300;
                 selection-color: #00FF00;
             }
             QHeaderView::section {
-                background-color: #003300;
+                background-color: #001100;
                 color: #00FF00;
-            }
-            QTableCornerButton::section {
-                background-color: #003300;
-                border: 1px solid #00FF00;
+                border: 1px solid #003300;
             }
             QTableWidget::item {
                 background-color: black;
                 color: #00FF00;
             }
             QTableWidget::item:alternate {
-                background-color: #002200;
+                background-color: #001100;
+                color: #00FF00;
             }
             QPushButton {
                 background-color: black;
@@ -248,25 +246,31 @@ class GameListGenerator(QWidget):
         row = self.table.rowCount()
         self.table.insertRow(row)
 
+        # Exclude checkbox
         chk = QTableWidgetItem()
         chk.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
         chk.setCheckState(Qt.Unchecked)
         self.table.setItem(row, 0, chk)
 
+        # ROM path (locked)
         path_item = QTableWidgetItem(os.path.join(root, file))
-        name_item = QTableWidgetItem(display_name)
+        path_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         self.table.setItem(row, 1, path_item)
+
+        # Name (editable)
+        name_item = QTableWidgetItem(display_name)
+        name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable)
         self.table.setItem(row, 2, name_item)
 
     def generate_gamelist(self):
         rom_dir = self.ent_rom.text().strip()
         if not rom_dir:
-            QMessageBox.warning(self, "No ROM Directory", "Please set a ROM directory before generating.")
+            self.status_bar.showMessage("No ROM directory set.", 5000)
             return
 
         output_base = self.ent_output.text().strip()
         if not output_base:
-            QMessageBox.warning(self, "No Output Directory", "Please set the base gamelist output folder.")
+            self.status_bar.showMessage("No output directory set.", 5000)
             return
 
         rom_base_name = os.path.basename(os.path.normpath(rom_dir))
@@ -274,7 +278,7 @@ class GameListGenerator(QWidget):
         try:
             os.makedirs(system_output_path, exist_ok=True)
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to create output folder:\n{system_output_path}\n\n{e}")
+            self.status_bar.showMessage(f"Failed to create output folder: {e}", 5000)
             return
 
         gamelist_file = os.path.join(system_output_path, "gamelist.xml")
@@ -304,9 +308,8 @@ class GameListGenerator(QWidget):
             ET.SubElement(game, "desc").text = ""
             games_written += 1
 
-        # Only write if we actually found ROMs
         if games_written == 0:
-            print("[gamelist_generator] No ROMs found → skipping gamelist.xml write.")
+            self.status_bar.showMessage("No ROMs found → skipping gamelist.xml.", 5000)
             return
 
         try:
@@ -320,12 +323,12 @@ class GameListGenerator(QWidget):
                 with open(gamelist_file, "w", encoding="utf-8") as f:
                     f.write(pretty)
         except Exception as e:
-            QMessageBox.critical(self, "Write Error", f"Failed to write gamelist.xml:\n{e}")
-            print(f"Failed to write gamelist.xml: {e}")
+            self.status_bar.showMessage(f"Write error: {e}", 5000)
             return
 
-        QMessageBox.information(self, "Gamelist Written", f"gamelist.xml written with {games_written} entries:\n{gamelist_file}")
-        print(f"[gamelist_generator] Wrote gamelist.xml with {games_written} entries → {gamelist_file}")
+        self.status_bar.showMessage(
+            f"Wrote gamelist.xml with {games_written} entries → {gamelist_file}", 10000
+        )
 
     def clear_fields(self):
         self.ent_rom.clear()

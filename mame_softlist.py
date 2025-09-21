@@ -1,21 +1,21 @@
 import xml.etree.ElementTree as ET
 
 
-def load_softlist(xml_path):
+def load_softlist(file_path):
     """
-    Parse a MAME softlist XML file into a dict:
-      { "romfilename": "Full Game Name", ... }
+    Load a MAME softlist XML file and return a dict:
+    { rom_name: description }
     """
-    result = {}
+    games = {}
     try:
-        tree = ET.parse(xml_path)
+        tree = ET.parse(file_path)
         root = tree.getroot()
-
         for software in root.findall("software"):
-            name = software.get("name", "").strip().lower()
-            description = software.findtext("description", "").strip()
+            name = software.get("name", "").strip()
+            description_elem = software.find("description")
             if name:
-                result[name] = description or name
+                desc = description_elem.text.strip() if description_elem is not None else name
+                games[name.lower()] = desc
     except Exception as e:
-        print(f"[mame_softlist] Failed to parse {xml_path}: {e}")
-    return result
+        print(f"[mame_softlist] Error loading softlist {file_path}: {e}")
+    return games
